@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>My Library — HILIGHT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Clash+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <style>
+    /* ── Library-specific styles ── */
+    .library-hero {
+      padding: 56px 0 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+    .library-hero-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 32px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 24px; flex-wrap: wrap;
+    }
+    .lib-eyebrow {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: #8b5cf6; margin-bottom: 10px;
+    }
+    .lib-title { font-size: 36px; font-weight: 800; margin-bottom: 6px; }
+    .lib-sub   { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+    .lib-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .lib-stat  {
+      text-align: center;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 20px;
+      min-width: 100px;
+    }
+    .lib-stat-val   { font-size: 22px; font-weight: 800; color: #8b5cf6; }
+    .lib-stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* Toolbar */
+    .lib-toolbar {
+      max-width: 1100px; margin: 0 auto 24px; padding: 0 32px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .lib-search {
+      flex: 1; min-width: 200px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: var(--font-mono); font-size: 13px;
+      padding: 10px 14px 10px 38px;
+      outline: none; transition: border-color .2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7180' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.868-3.833zm-5.242 1.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 12px center;
+    }
+    .lib-search:focus { border-color: #8b5cf6; }
+    .lib-search::placeholder { color: var(--muted); }
+
+    .sort-select {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: var(--font-mono); font-size: 12px;
+      padding: 10px 14px; outline: none; cursor: pointer;
+    }
+    .btn-new-video {
+      background: linear-gradient(135deg, #8b5cf6, var(--accent2));
+      border: none; border-radius: 8px; color: #000;
+      font-family: var(--font-head); font-size: 13px; font-weight: 700;
+      padding: 10px 20px; cursor: pointer; white-space: nowrap;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-new-video:hover { opacity: .88; }
+
+    /* Grid */
+    .lib-grid {
+      max-width: 1100px; margin: 0 auto; padding: 0 32px 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    /* Card */
+    .hl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      cursor: pointer;
+    }
+    .hl-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(139,92,246,0.35);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    /* Thumbnail area */
+    .card-thumb {
+      position: relative; width: 100%; padding-top: 56.25%; /* 16:9 */
+      background: var(--surface2); overflow: hidden;
+    }
+    .card-thumb img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .card-thumb-placeholder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; color: var(--muted);
+      background: linear-gradient(135deg, var(--surface2), var(--surface));
+    }
+    .card-play-btn {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.4);
+      opacity: 0; transition: opacity .2s;
+    }
+    .card-play-btn span {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(139,92,246,0.9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #000;
+    }
+    .hl-card:hover .card-play-btn { opacity: 1; }
+
+    .card-duration-badge {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(0,0,0,0.75); color: #fff;
+      font-family: var(--font-mono); font-size: 10px;
+      padding: 3px 8px; border-radius: 4px;
+    }
+
+    /* Card body */
+    .card-body { padding: 16px; }
+    .card-filename {
+      font-size: 14px; font-weight: 600; margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-meta {
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+      margin-bottom: 12px; display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .card-meta span { display: flex; align-items: center; gap: 4px; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .card-tag {
+      font-family: var(--font-mono); font-size: 10px;
+      padding: 2px 8px; border-radius: 99px;
+      background: rgba(245,158,11,0.12); color: var(--accent2);
+      border: 1px solid rgba(245,158,11,0.25);
+    }
+    .card-tag.green {
+      background: rgba(139,92,246,0.1); color: #8b5cf6;
+      border-color: rgba(139,92,246,0.25);
+    }
+
+    /* Card actions */
+    .card-actions {
+      display: flex; gap: 8px; border-top: 1px solid var(--border);
+      padding: 12px 16px; background: var(--surface2);
+    }
+    .card-btn {
+      flex: 1; padding: 8px 0; text-align: center;
+      background: none; border: 1px solid var(--border);
+      border-radius: 6px; color: var(--muted);
+      font-family: var(--font-mono); font-size: 11px;
+      cursor: pointer; transition: all .15s;
+      text-decoration: none; display: inline-block;
+    }
+    .card-btn:hover { border-color: #8b5cf6; color: #8b5cf6; }
+    .card-btn.danger:hover { border-color: #ff5c5c; color: #ff5c5c; }
+    .card-btn.primary {
+      background: #8b5cf6; color: #000; border-color: #8b5cf6;
+      font-weight: 700;
+    }
+    .card-btn.primary:hover { opacity: .85; }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center; padding: 80px 24px;
+    }
+    .empty-icon  { font-size: 56px; margin-bottom: 16px; }
+    .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .empty-sub   { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+    /* Video modal */
+    .video-modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 2000; display: flex;
+      align-items: center; justify-content: center;
+      padding: 24px;
+      display: none;
+    }
+    .video-modal-backdrop.show { display: flex; }
+    .video-modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      max-width: 860px; width: 100%;
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform:scale(.96); } to { opacity:1; transform:scale(1); } }
+    .video-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .video-modal-title { font-size: 14px; font-weight: 600; }
+    .video-modal-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 18px; cursor: pointer; padding: 4px 8px;
+    }
+    .video-modal-close:hover { color: var(--text); }
+    .video-modal video { width: 100%; display: block; max-height: 480px; background: #000; }
+    .video-modal-footer {
+      padding: 14px 20px; display: flex; gap: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* Toast */
+    #libToast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 20px; border-radius: 8px;
+      font-family: var(--font-mono); font-size: 13px; z-index: 9999;
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+    }
+    #libToast.show { opacity: 1; }
+  </style>
+  <link rel="stylesheet" href="/static/animations.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="noise-overlay"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo"><a href="/" style="text-decoration:none;color:inherit"><span class="logo-mark">▶</span><span class="logo-text">HILIGHT</span></a></div>
+  <nav class="header-nav">
+    <a href="/" class="nav-btn">🎬 New Video</a>
+    <button class="nav-btn active-nav">📚 My Library</button>
+    <div class="user-area" id="userArea">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-dropdown-wrap">
+        <button class="user-name-btn" id="userNameBtn">
+          <span id="userNameText">User</span>
+          <span class="dropdown-arrow">▾</span>
+        </button>
+        <div class="user-dropdown hidden" id="userDropdown">
+          <div class="dropdown-info">
+            <div class="dropdown-name"  id="dropName">—</div>
+            <div class="dropdown-email" id="dropEmail">—</div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="btnSignOut">🚪 Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="library-hero">
+  <div class="library-hero-inner">
+    <div>
+      <div class="lib-eyebrow">Personal Library</div>
+      <h1 class="lib-title">My Highlights</h1>
+      <p class="lib-sub">All your saved highlight videos, transcripts, and reports in one place.</p>
+    </div>
+    <div class="lib-stats">
+      <div class="lib-stat">
+        <div class="lib-stat-val" id="statTotal">—</div>
+        <div class="lib-stat-label">Videos Saved</div>
+      </div>
+      <div class="lib-stat">
+        <div class="lib-stat-val" id="statTimeSaved">—</div>
+        <div class="lib-stat-label">Minutes Saved</div>
+      </div>
+      <div class="lib-stat">
+        <div class="lib-stat-val" id="statWithTranscript">—</div>
+        <div class="lib-stat-label">With Transcript</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div class="lib-toolbar">
+  <input type="text" class="lib-search" id="searchInput" placeholder="Search by filename or transcript…"/>
+  <select class="sort-select" id="sortSelect">
+    <option value="newest">Newest first</option>
+    <option value="oldest">Oldest first</option>
+    <option value="longest">Longest original</option>
+    <option value="shortest">Shortest highlight</option>
+  </select>
+  <a href="/" class="btn-new-video">+ New Video</a>
+</div>
+
+<!-- GRID -->
+<div class="lib-grid" id="libGrid">
+  <!-- Cards injected by JS -->
+  <div class="hl-card skeleton" style="height:320px"></div>
+  <div class="hl-card skeleton" style="height:320px"></div>
+  <div class="hl-card skeleton" style="height:320px"></div>
+</div>
+
+<!-- VIDEO PLAYER MODAL -->
+<div class="video-modal-backdrop" id="videoModal">
+  <div class="video-modal">
+    <div class="video-modal-header">
+      <span class="video-modal-title" id="modalTitle">Highlight</span>
+      <button class="video-modal-close" id="modalClose">✕</button>
+    </div>
+    <video id="modalVideo" controls playsinline></video>
+    <div class="video-modal-footer">
+      <a id="modalDownload" class="card-btn primary" download>⬇ Download MP4</a>
+      <a id="modalReport"   class="card-btn" style="display:none" download>📄 Download Report</a>
+    </div>
+  </div>
+</div>
+
+<div id="libToast"></div>
+
+<script>
+let allEntries = [];
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(async function init() {
+  // Auth check
+  try {
+    const res  = await fetch('/api/me');
+    const data = await res.json();
+    if (!data.logged_in) { window.location.href = '/login?next=/library'; return; }
+    const u = data.user;
+    document.getElementById('userAvatar').textContent   = u.avatar || u.name[0].toUpperCase();
+    document.getElementById('userNameText').textContent = u.name.split(' ')[0];
+    document.getElementById('dropName').textContent     = u.name;
+    document.getElementById('dropEmail').textContent    = u.email;
+  } catch(e) { window.location.href = '/login'; return; }
+
+  await loadLibrary();
+})();
+
+async function loadLibrary() {
+  try {
+    const res  = await fetch('/api/library');
+    const data = await res.json();
+    allEntries = data.entries || [];
+    renderStats(allEntries);
+    renderGrid(allEntries);
+  } catch(e) {
+    document.getElementById('libGrid').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Failed to load library</div></div>';
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+function renderStats(entries) {
+  document.getElementById('statTotal').textContent = entries.length;
+
+  const totalSavedSec = entries.reduce((acc, e) => {
+    return acc + (e.original_duration - e.highlight_duration);
+  }, 0);
+  document.getElementById('statTimeSaved').textContent = Math.round(totalSavedSec / 60);
+
+  const withTx = entries.filter(e => e.has_transcript).length;
+  document.getElementById('statWithTranscript').textContent = withTx;
+}
+
+// ── Grid render ───────────────────────────────────────────────────────────
+function renderGrid(entries) {
+  const grid = document.getElementById('libGrid');
+  if (!entries.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <div class="empty-title">No saved highlights yet</div>
+        <div class="empty-sub">Process a video and it will automatically appear here.</div>
+        <a href="/" class="btn-new-video">Upload your first video →</a>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = entries.map(e => cardHTML(e)).join('');
+
+  // Load cover images lazily
+  entries.forEach(e => {
+    if (e.has_cover) {
+      const img = document.getElementById(`cover-${e.video_id}`);
+      if (img) img.src = `/api/library/${e.video_id}/cover`;
+    }
+  });
+
+  // Bind actions
+  grid.querySelectorAll('.play-btn').forEach(btn => {
+    btn.addEventListener('click', ev => {
+      ev.stopPropagation();
+      openVideo(btn.dataset.vid, btn.dataset.title, btn.dataset.hasReport === 'true');
+    });
+  });
+  grid.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', ev => {
+      ev.stopPropagation();
+      deleteEntry(btn.dataset.vid, btn.dataset.title);
+    });
+  });
+  grid.querySelectorAll('.hl-card').forEach(card => {
+    card.addEventListener('click', () => {
+      openVideo(card.dataset.vid, card.dataset.title, card.dataset.hasReport === 'true');
+    });
+  });
+}
+
+function cardHTML(e) {
+  const origMin  = Math.floor(e.original_duration  / 60);
+  const hlSec    = Math.round(e.highlight_duration);
+  const hlMin    = Math.floor(hlSec / 60);
+  const hlSecR   = hlSec % 60;
+  const hlStr    = hlMin > 0 ? `${hlMin}m ${hlSecR}s` : `${hlSec}s`;
+  const saved    = Math.round((e.original_duration - e.highlight_duration) / 60);
+  const date     = e.saved_at ? e.saved_at.split(' ')[0] : '—';
+  const name     = e.filename.length > 36 ? e.filename.slice(0,33)+'…' : e.filename;
+
+  const tags = [];
+  if (e.has_transcript)       tags.push(`<span class="card-tag green">🎤 Transcript</span>`);
+  if (e.has_report)           tags.push(`<span class="card-tag">📄 Report</span>`);
+  if (e.keyword_hits_count>0) tags.push(`<span class="card-tag">🔑 ${e.keyword_hits_count} keywords</span>`);
+  if (e.face_pct > 20)        tags.push(`<span class="card-tag">😊 Face detected</span>`);
+
+  const thumb = e.has_cover
+    ? `<img id="cover-${e.video_id}" src="/static/placeholder.jpg" alt="thumbnail" onerror="this.style.display='none'"/>`
+    : '';
+
+  return `
+  <div class="hl-card" data-vid="${e.video_id}" data-title="${e.filename}" data-has-report="${e.has_report}">
+    <div class="card-thumb">
+      ${thumb || '<div class="card-thumb-placeholder">🎬</div>'}
+      <div class="card-play-btn play-btn" data-vid="${e.video_id}" data-title="${name}" data-has-report="${e.has_report}">
+        <span>▶</span>
+      </div>
+      <div class="card-duration-badge">${hlStr}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-filename" title="${e.filename}">${name}</div>
+      <div class="card-meta">
+        <span>📅 ${date}</span>
+        <span>⏱ ${origMin}m original</span>
+        <span>✂️ ${saved}m saved</span>
+        <span>📌 ${e.segments_count} segments</span>
+      </div>
+      ${tags.length ? `<div class="card-tags">${tags.join('')}</div>` : ''}
+      ${e.transcript_excerpt ? `<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px">"${e.transcript_excerpt.slice(0,100)}…"</div>` : ''}
+    </div>
+    <div class="card-actions">
+      <button class="card-btn primary play-btn" data-vid="${e.video_id}" data-title="${name}" data-has-report="${e.has_report}">▶ Play</button>
+      <a class="card-btn" href="/library/download/${e.video_id}" download onclick="event.stopPropagation()">⬇ MP4</a>
+      ${e.has_report ? `<a class="card-btn" href="/library/report/${e.video_id}" download onclick="event.stopPropagation()">📄 PDF</a>` : ''}
+      <button class="card-btn danger delete-btn" data-vid="${e.video_id}" data-title="${name}" onclick="event.stopPropagation()">🗑</button>
+    </div>
+  </div>`;
+}
+
+// ── Video modal ───────────────────────────────────────────────────────────
+function openVideo(vid, title, hasReport) {
+  const modal   = document.getElementById('videoModal');
+  const video   = document.getElementById('modalVideo');
+  const dl      = document.getElementById('modalDownload');
+  const rpt     = document.getElementById('modalReport');
+  const ttl     = document.getElementById('modalTitle');
+
+  ttl.textContent   = title;
+  video.src         = `/library/stream/${vid}`;
+  dl.href           = `/library/download/${vid}`;
+  rpt.style.display = hasReport ? 'inline-block' : 'none';
+  if (hasReport) rpt.href = `/library/report/${vid}`;
+  modal.classList.add('show');
+  video.play().catch(()=>{});
+}
+
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('videoModal').classList.remove('show');
+  const v = document.getElementById('modalVideo');
+  v.pause(); v.src = '';
+});
+document.getElementById('videoModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('videoModal')) {
+    document.getElementById('modalClose').click();
+  }
+});
+
+// ── Delete ────────────────────────────────────────────────────────────────
+async function deleteEntry(vid, title) {
+  if (!confirm(`Delete "${title}" from your library?\n\nThe file will be permanently removed.`)) return;
+  try {
+    const res  = await fetch(`/api/library/${vid}/delete`, { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('🗑 Deleted from library');
+      allEntries = allEntries.filter(e => e.video_id !== vid);
+      renderStats(allEntries);
+      renderGrid(filterAndSort(allEntries));
+    } else {
+      showToast('⚠️ Could not delete');
+    }
+  } catch(e) { showToast('⚠️ Error deleting'); }
+}
+
+// ── Search + Sort ─────────────────────────────────────────────────────────
+function filterAndSort(entries) {
+  const q    = document.getElementById('searchInput').value.toLowerCase().trim();
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = q
+    ? entries.filter(e =>
+        e.filename.toLowerCase().includes(q) ||
+        (e.transcript_excerpt||'').toLowerCase().includes(q))
+    : entries;
+
+  const sorted = [...filtered];
+  if      (sort === 'newest')   sorted.sort((a,b) => b.saved_at.localeCompare(a.saved_at));
+  else if (sort === 'oldest')   sorted.sort((a,b) => a.saved_at.localeCompare(b.saved_at));
+  else if (sort === 'longest')  sorted.sort((a,b) => b.original_duration - a.original_duration);
+  else if (sort === 'shortest') sorted.sort((a,b) => a.highlight_duration - b.highlight_duration);
+  return sorted;
+}
+
+document.getElementById('searchInput').addEventListener('input',  () => renderGrid(filterAndSort(allEntries)));
+document.getElementById('sortSelect').addEventListener('change',  () => renderGrid(filterAndSort(allEntries)));
+
+// ── Auth dropdown ─────────────────────────────────────────────────────────
+document.getElementById('userNameBtn').addEventListener('click', () => {
+  document.getElementById('userDropdown').classList.toggle('hidden');
+});
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.user-dropdown-wrap');
+  if (wrap && !wrap.contains(e.target))
+    document.getElementById('userDropdown').classList.add('hidden');
+});
+document.getElementById('btnSignOut').addEventListener('click', async () => {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login';
+});
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('libToast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+<script src="/static/three-bg.js"></script>
+</body>
+</html>

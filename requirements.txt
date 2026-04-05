@@ -1,0 +1,18 @@
+# Compatible with Python 3.9 → 3.13
+setuptools>=69.0.0
+flask>=3.0.0
+flask-cors>=4.0.0
+opencv-python-headless>=4.9.0.80
+numpy>=1.26.0
+pandas>=2.1.0
+scikit-learn>=1.4.0
+joblib>=1.3.2
+Pillow>=10.2.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+scipy>=1.12.0
+imageio>=2.33.0
+imageio-ffmpeg>=0.4.9
+flask-sqlalchemy>=3.1.1
+moviepy>=1.0.3
+

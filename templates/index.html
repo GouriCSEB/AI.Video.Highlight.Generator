@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>HILIGHT · AI Video Highlight Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/animations.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<!-- 3D Canvas -->
+<canvas id="three-canvas"></canvas>
+
+<!-- CSS glow orbs -->
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<div class="noise-overlay"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo"><span class="logo-mark">▶</span><span class="logo-text">HILIGHT</span></div>
+  <nav class="header-nav">
+    <button class="nav-btn" id="btnShowHistory">📋 History</button>
+    <a href="/library" class="nav-btn" id="btnLibrary" style="display:none">📚 My Library</a>
+    <button class="nav-btn" id="btnShowMetrics">📊 Model Metrics</button>
+    <span class="badge">AI-Powered</span>
+
+    <!-- Guest buttons (visible by default, hidden after login check) -->
+    <div id="guestButtons">
+      <a href="/login"  class="nav-btn" id="navLoginBtn">Sign In</a>
+      <a href="/signup" class="nav-btn nav-login">Sign Up Free →</a>
+    </div>
+
+    <!-- User profile area (hidden until login confirmed) -->
+    <div class="user-area" id="userArea" style="display:none">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-dropdown-wrap">
+        <button class="user-name-btn" id="userNameBtn">
+          <span id="userNameText">User</span>
+          <span class="dropdown-arrow">▾</span>
+        </button>
+        <div class="user-dropdown hidden" id="userDropdown">
+          <div class="dropdown-info">
+            <div class="dropdown-name"  id="dropName">—</div>
+            <div class="dropdown-email" id="dropEmail">—</div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a href="/library" class="dropdown-item">📚 My Library</a>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="btnSignOut">🚪 Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Whisper AI · Face Detection · Emotion Analysis · PDF Reports</div>
+  <h1 class="hero-title">Turn <em>long videos</em><br>into sharp highlights</h1>
+  <p class="hero-sub">Upload any lecture, webinar, or tutorial. Our AI stack scores every frame using ML, speech recognition, face detection and emotion analysis.</p>
+  <div class="hero-cta" id="heroCta">
+    <a href="/signup" class="btn-hero-signup">Create Free Account →</a>
+    <a href="/login"  class="btn-hero-login">Already have an account? Sign in</a>
+  </div>
+</section>
+
+<main class="main-content">
+
+  <!-- STEP 1: UPLOAD + OPTIONS -->
+  <section class="card card-3d" id="cardUpload">
+    <div class="card-label">01 / Upload</div>
+    <h2>Drop your video</h2>
+
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">🎬</div>
+      <p class="drop-primary">Drag &amp; drop your video here</p>
+      <p class="drop-secondary">MP4, MOV, AVI, MKV, WEBM · up to 500 MB</p>
+      <input type="file" id="fileInput" accept="video/*" hidden/>
+      <button class="btn-upload" id="btnBrowse">Choose file</button>
+    </div>
+
+    <!-- Highlight length slider -->
+    <div class="slider-section">
+      <div class="slider-header">
+        <span class="slider-label">🎯 Highlight Length</span>
+        <span class="slider-value" id="sliderVal">30% of video</span>
+      </div>
+      <input type="range" id="highlightSlider" min="5" max="80" value="30" step="5" class="hl-slider"/>
+      <div class="slider-hints"><span>5% — Very short</span><span>40% — Balanced</span><span>80% — Most content</span></div>
+    </div>
+
+    <!-- AI Feature toggles -->
+    <div class="ai-options">
+      <div class="ai-options-title">🤖 AI Features</div>
+      <div class="ai-options-grid">
+
+        <label class="ai-toggle" id="toggleWhisperWrap">
+          <div class="toggle-header">
+            <input type="checkbox" id="toggleWhisper" checked/>
+            <span class="toggle-icon">🎤</span>
+            <span class="toggle-label">Speech-to-Text</span>
+            <span class="toggle-badge" id="badgeWhisper">Whisper AI</span>
+          </div>
+          <p class="toggle-desc">Transcribes speech and highlights spoken key moments</p>
+        </label>
+
+        <label class="ai-toggle">
+          <div class="toggle-header">
+            <input type="checkbox" id="toggleFace" checked/>
+            <span class="toggle-icon">😊</span>
+            <span class="toggle-label">Face Detection</span>
+            <span class="toggle-badge">OpenCV</span>
+          </div>
+          <p class="toggle-desc">Boosts segments where a presenter's face is visible</p>
+        </label>
+
+        <label class="ai-toggle">
+          <div class="toggle-header">
+            <input type="checkbox" id="toggleEmotion" checked/>
+            <span class="toggle-icon">🧠</span>
+            <span class="toggle-label">Emotion Analysis</span>
+            <span class="toggle-badge">DeepFace</span>
+          </div>
+          <p class="toggle-desc">Detects presenter emotions to find engaging moments</p>
+        </label>
+
+        <label class="ai-toggle">
+          <div class="toggle-header">
+            <input type="checkbox" id="toggleReport" checked/>
+            <span class="toggle-icon">📄</span>
+            <span class="toggle-label">PDF Report</span>
+            <span class="toggle-badge">ReportLab</span>
+          </div>
+          <p class="toggle-desc">Generates a full analysis report as a downloadable PDF</p>
+        </label>
+
+      </div>
+
+      <!-- Keyword input -->
+      <div class="keyword-wrap" id="keywordWrap">
+        <label class="keyword-label" for="keywordInput">🔑 Keyword Boost — comma-separated words to prioritise</label>
+        <input type="text" id="keywordInput" class="keyword-input"
+               placeholder="e.g. conclusion, important, summary, formula, key point"/>
+      </div>
+    </div>
+
+    <div class="file-info hidden" id="fileInfo">
+      <div class="fi-icon">📹</div>
+      <div class="fi-details">
+        <span class="fi-name" id="fiName">—</span>
+        <span class="fi-size" id="fiSize">—</span>
+      </div>
+      <button class="btn-go" id="btnUpload">Upload &amp; Analyse →</button>
+    </div>
+
+    <div class="progress-wrap hidden" id="uploadProgress">
+      <div class="progress-label">Uploading…</div>
+      <div class="progress-track"><div class="progress-fill" id="uploadBar"></div></div>
+      <div class="progress-pct" id="uploadPct">0%</div>
+    </div>
+  </section>
+
+  <!-- STEP 2: PROCESSING -->
+  <section class="card card-3d hidden" id="cardProcess">
+    <div class="card-label">02 / Processing</div>
+    <h2>Analysing video</h2>
+    <div class="pipeline-steps">
+      <div class="pipe-step" data-step="extracting">    <span class="pipe-icon">🔍</span><span class="pipe-label">Extracting frames</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="scoring">       <span class="pipe-icon">🌲</span><span class="pipe-label">ML scoring</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="detecting_faces"><span class="pipe-icon">😊</span><span class="pipe-label">Face detection</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="detecting_emotions"><span class="pipe-icon">🧠</span><span class="pipe-label">Emotion analysis</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="transcribing">  <span class="pipe-icon">🎤</span><span class="pipe-label">Transcribing speech</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="generating">    <span class="pipe-icon">✂️</span><span class="pipe-label">Generating highlight</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="generating_report"><span class="pipe-icon">📄</span><span class="pipe-label">Building PDF report</span><span class="pipe-status">waiting</span></div>
+      <div class="pipe-step" data-step="done">          <span class="pipe-icon">✅</span><span class="pipe-label">Complete</span><span class="pipe-status">waiting</span></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill accent" id="processBar"></div></div>
+      <div class="progress-pct" id="processPct">0%</div>
+    </div>
+  </section>
+
+  <!-- STEP 3: RESULTS -->
+  <section class="card card-3d hidden" id="cardResults">
+    <div class="card-label">03 / Results</div>
+    <h2>Highlight ready</h2>
+
+    <div class="results-grid">
+      <div class="result-player-wrap">
+        <video id="hlVideo" controls playsinline></video>
+        <div class="player-actions">
+          <a id="btnDownload" class="btn-download" download>⬇ Download Highlight</a>
+          <a id="btnReport"   class="btn-report hidden" download>📄 Download Report</a>
+        </div>
+      </div>
+      <div class="stats-panel">
+        <div class="stat-row"><span class="stat-label">Original length</span>   <span class="stat-val" id="statOrigLen">—</span></div>
+        <div class="stat-row"><span class="stat-label">Highlight length</span>  <span class="stat-val" id="statHlLen">—</span></div>
+        <div class="stat-row"><span class="stat-label">Segments</span>          <span class="stat-val" id="statSegs">—</span></div>
+        <div class="stat-row"><span class="stat-label">Face visibility</span>   <span class="stat-val" id="statFace">—</span></div>
+        <div class="stat-row"><span class="stat-label">Top emotion</span>       <span class="stat-val" id="statEmotion">—</span></div>
+        <div class="stat-row"><span class="stat-label">Keyword hits</span>      <span class="stat-val" id="statKeywords">—</span></div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-section">
+      <h3 class="section-heading">Importance Timeline <span class="section-hint">— click to seek</span></h3>
+      <div class="timeline-wrap">
+        <canvas id="timelineCanvas" height="100"></canvas>
+        <div class="timeline-cursor hidden" id="timelineCursor"></div>
+      </div>
+      <div class="timeline-legend">
+        <span class="leg leg-score">ML score</span>
+        <span class="leg leg-hl">Highlight segment</span>
+        <span class="leg leg-kw">Keyword hit</span>
+      </div>
+    </div>
+
+    <!-- Transcript -->
+    <div class="transcript-section hidden" id="transcriptSection">
+      <h3 class="section-heading">📝 Transcript
+        <button class="btn-small" id="btnToggleTranscript">Show / Hide</button>
+      </h3>
+      <div class="transcript-box hidden" id="transcriptBox">
+        <div class="transcript-meta" id="transcriptMeta"></div>
+        <div class="transcript-text" id="transcriptText"></div>
+      </div>
+    </div>
+
+    <!-- Face + Emotion summary -->
+    <div class="face-section hidden" id="faceSection">
+      <h3 class="section-heading">😊 Face &amp; Emotion Analysis</h3>
+      <div class="face-grid" id="faceGrid"></div>
+    </div>
+
+    <!-- Keyword hits -->
+    <div class="keywords-section hidden" id="keywordsSection">
+      <h3 class="section-heading">🔑 Keyword Hits</h3>
+      <div id="keywordHitsList" class="kw-list"></div>
+    </div>
+
+    <!-- Segments -->
+    <div class="segment-list-section">
+      <h3 class="section-heading">Highlight Segments</h3>
+      <p class="section-sub">Click a segment to jump to it in the video</p>
+      <div id="segmentList" class="segment-list"></div>
+    </div>
+
+    <button class="btn-reset" id="btnReset">⟳ Analyse another video</button>
+  </section>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-backdrop hidden" id="historyModal">
+    <div class="modal">
+      <button class="modal-close" id="btnCloseHistory">✕</button>
+      <div class="card-label">Session History</div>
+      <h2>Processed Videos</h2>
+      <div id="historyList" class="history-list"><p class="muted-msg">No videos processed yet.</p></div>
+    </div>
+  </div>
+
+  <!-- METRICS MODAL -->
+  <div class="modal-backdrop hidden" id="metricsModal">
+    <div class="modal">
+      <button class="modal-close" id="btnCloseMetrics">✕</button>
+      <div class="card-label">Model Evaluation</div>
+      <h2>ML Performance Metrics</h2>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-val" id="mAccuracy">—</div><div class="metric-label">Accuracy</div></div>
+        <div class="metric-card"><div class="metric-val" id="mPrecision">—</div><div class="metric-label">Precision</div></div>
+        <div class="metric-card"><div class="metric-val" id="mRecall">—</div><div class="metric-label">Recall</div></div>
+        <div class="metric-card"><div class="metric-val" id="mF1">—</div><div class="metric-label">F1 Score</div></div>
+      </div>
+      <h3 class="section-heading mt">Confusion Matrix</h3>
+      <canvas id="cmCanvas" width="260" height="260"></canvas>
+      <h3 class="section-heading mt">Feature Importances</h3>
+      <canvas id="fiCanvas" height="220"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <span>HILIGHT · AI Video Highlight Generator</span>
+  <span class="footer-sep">·</span>
+  <span>Flask · OpenCV · Scikit-learn · Whisper · DeepFace · ffmpeg</span>
+</footer>
+
+<script src="/static/script.js"></script>
+<script src="/static/three-bg.js"></script>
+<script>
+// ── Auth: check login state on page load ────────────────────────────────
+(async function initAuth() {
+  try {
+    const res  = await fetch('/api/me');
+    const data = await res.json();
+    if (data.logged_in && data.user) {
+      const u = data.user;
+      // Logged in — show user area, hide guest buttons
+      document.getElementById('userArea').style.display    = 'flex';
+      document.getElementById('guestButtons').style.display = 'none';
+      document.getElementById('btnLibrary').style.display   = 'inline-block';
+      document.getElementById('userAvatar').textContent     = u.avatar || u.name[0].toUpperCase();
+      document.getElementById('userNameText').textContent   = u.name.split(' ')[0];
+      document.getElementById('dropName').textContent       = u.name;
+      document.getElementById('dropEmail').textContent      = u.email;
+      // Hide sign-up CTA in hero if already logged in
+      const cta = document.getElementById('heroCta');
+      if (cta) cta.style.display = 'none';
+    }
+    // Not logged in — guest buttons stay visible (they are shown by default)
+  } catch(e) {
+    // Server error — keep guest buttons visible
+  }
+})();
+
+// Toggle dropdown
+document.getElementById('userNameBtn')?.addEventListener('click', () => {
+  document.getElementById('userDropdown').classList.toggle('hidden');
+});
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.user-dropdown-wrap');
+  if (wrap && !wrap.contains(e.target))
+    document.getElementById('userDropdown')?.classList.add('hidden');
+});
+
+// Sign out
+document.getElementById('btnSignOut')?.addEventListener('click', async () => {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login';
+});
+</script>
+</body>
+</html>

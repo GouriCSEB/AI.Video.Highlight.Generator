@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Sign In — HILIGHT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Clash+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #07060f;
+      --surface:  rgba(255,255,255,0.04);
+      --surface2: rgba(255,255,255,0.07);
+      --border:   rgba(255,255,255,0.08);
+      --accent:   #8b5cf6;
+      --accent2:  #f59e0b;
+      --text:     #f0eeff;
+      --muted:    #6b648f;
+      --error:    #f43f5e;
+      --font-head: 'Cabinet Grotesk', 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', 'DM Mono', monospace;
+    }
+
+    body {
+      background: #07060f;
+      color: var(--text);
+      font-family: var(--font-head);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Left panel ── */
+    .left-panel {
+      width: 55%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .left-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 30% 40%, rgba(139,92,246,0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 70% 70%, rgba(245,158,11,0.08) 0%, transparent 70%);
+    }
+
+    /* Animated grid */
+    .grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 52px 52px;
+      animation: gridMove 20s linear infinite;
+    }
+    @keyframes gridMove {
+      from { transform: translateY(0); }
+      to   { transform: translateY(48px); }
+    }
+
+    .left-content {
+      position: relative;
+      z-index: 2;
+      max-width: 420px;
+      padding: 48px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 56px;
+    }
+    .brand-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #8b5cf6, #f59e0b);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .brand-name {
+      font-size: 22px; font-weight: 800; letter-spacing: .08em;
+    }
+
+    .left-heading {
+      font-size: 42px; font-weight: 800; line-height: 1.15;
+      margin-bottom: 20px;
+    }
+    .left-heading em {
+      font-style: normal;
+      background: linear-gradient(135deg, #a78bfa, #f59e0b);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .left-sub {
+      font-family: var(--font-mono);
+      font-size: 14px; color: var(--muted); line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    /* Feature pills */
+    .features {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .feature {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color .2s;
+    }
+    .feature:hover { border-color: rgba(0,229,122,0.3); }
+    .feature-icon { font-size: 20px; width: 36px; text-align: center; }
+    .feature-text { font-size: 13px; }
+    .feature-title { font-weight: 600; margin-bottom: 2px; }
+    .feature-desc  { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+    /* ── Right panel (form) ── */
+    .right-panel {
+      width: 45%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 56px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      position: relative;
+    }
+    .right-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #8b5cf6, #f59e0b, transparent);
+    }
+
+    .form-wrap {
+      width: 100%; max-width: 360px;
+    }
+    .form-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 10px;
+    }
+    .form-title {
+      font-size: 28px; font-weight: 800; margin-bottom: 6px;
+    }
+    .form-sub {
+      font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .form-sub a { color: var(--accent); text-decoration: none; }
+    .form-sub a:hover { text-decoration: underline; }
+
+    /* Input groups */
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap .icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 15px; pointer-events: none;
+    }
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-mono); font-size: 13px;
+      padding: 12px 14px 12px 42px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input.error-field { border-color: var(--error); }
+
+    /* Password toggle */
+    .toggle-pw {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      cursor: pointer; font-size: 15px; color: var(--muted);
+      background: none; border: none; padding: 0;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    /* Error message */
+    .error-msg {
+      background: rgba(255,92,92,0.1);
+      border: 1px solid rgba(255,92,92,0.3);
+      border-radius: 8px; padding: 12px 14px;
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--error); margin-bottom: 18px;
+      display: none; align-items: center; gap: 8px;
+    }
+    .error-msg.show { display: flex; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      border: none; border-radius: 8px;
+      color: #000; font-family: var(--font-head);
+      font-size: 14px; font-weight: 700; letter-spacing: .04em;
+      cursor: pointer; transition: opacity .2s, transform .1s;
+      margin-top: 6px; position: relative; overflow: hidden;
+    }
+    .btn-submit:hover   { opacity: .92; transform: translateY(-1px); }
+    .btn-submit:active  { transform: translateY(0); }
+    .btn-submit.loading { opacity: .7; cursor: not-allowed; }
+    .btn-submit .spinner {
+      display: none; width: 16px; height: 16px;
+      border: 2px solid rgba(0,0,0,0.3); border-top-color: #000;
+      border-radius: 50%; animation: spin .7s linear infinite;
+      margin: 0 auto;
+    }
+    .btn-submit.loading .btn-text   { display: none; }
+    .btn-submit.loading .spinner    { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 24px 0; font-family: var(--font-mono);
+      font-size: 11px; color: var(--muted);
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Guest button */
+    .btn-guest {
+      width: 100%; padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px; color: var(--muted);
+      font-family: var(--font-mono); font-size: 12px;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-guest:hover {
+      border-color: rgba(255,255,255,0.2); color: var(--text);
+    }
+
+    /* Forgot password */
+    .forgot {
+      text-align: right; margin-top: -10px; margin-bottom: 18px;
+    }
+    .forgot a {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--muted); text-decoration: none;
+    }
+    .forgot a:hover { color: var(--accent); }
+
+    /* Success flash */
+    .flash-success {
+      background: rgba(0,229,122,0.1);
+      border: 1px solid rgba(0,229,122,0.3);
+      border-radius: 8px; padding: 12px 14px;
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--accent); margin-bottom: 18px;
+      display: none; align-items: center; gap: 8px;
+    }
+    .flash-success.show { display: flex; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .left-panel  { display: none; }
+      .right-panel { width: 100%; border-left: none; padding: 32px 24px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/static/animations.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="grid-bg"></div>
+  <div class="left-content">
+    <div class="brand">
+      <div class="brand-mark">▶</div>
+      <span class="brand-name">HILIGHT</span>
+    </div>
+    <h1 class="left-heading">Your videos.<br><em>Smarter</em> &amp;<br>shorter.</h1>
+    <p class="left-sub">Upload any long video and let AI extract the most important moments automatically.</p>
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">🎤</span>
+        <div class="feature-text">
+          <div class="feature-title">Speech-to-Text</div>
+          <div class="feature-desc">Whisper AI transcribes everything spoken</div>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">😊</span>
+        <div class="feature-text">
+          <div class="feature-title">Face &amp; Emotion Detection</div>
+          <div class="feature-desc">Finds moments where the presenter is engaged</div>
+        </div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📄</span>
+        <div class="feature-text">
+          <div class="feature-title">PDF Analysis Report</div>
+          <div class="feature-desc">Full plain-English summary of your video</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-wrap">
+    <div class="form-eyebrow">Welcome back</div>
+    <h2 class="form-title">Sign in to HILIGHT</h2>
+    <p class="form-sub">
+      Don't have an account? <a href="/signup">Create one free →</a>
+    </p>
+
+    <!-- Flash messages -->
+    <div class="flash-success" id="flashSuccess">
+      <span>✅</span><span id="flashSuccessMsg"></span>
+    </div>
+    <div class="error-msg" id="errorMsg">
+      <span>⚠️</span><span id="errorText">Invalid credentials.</span>
+    </div>
+
+    <!-- Form -->
+    <div class="field">
+      <label for="email">Email address</label>
+      <div class="input-wrap">
+        <span class="icon">✉️</span>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input type="password" id="password" placeholder="Your password" autocomplete="current-password"/>
+        <button class="toggle-pw" onclick="togglePw('password', this)" tabindex="-1">👁</button>
+      </div>
+    </div>
+
+    <div class="forgot"><a href="#">Forgot password?</a></div>
+
+    <button class="btn-submit" id="btnLogin">
+      <span class="btn-text">Sign In →</span>
+      <div class="spinner"></div>
+    </button>
+
+    <div class="divider">or</div>
+    <button class="btn-guest" onclick="window.location='/'">Continue as Guest</button>
+  </div>
+</div>
+
+<script>
+  // Check for flash message from signup
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('signup') === 'success') {
+    document.getElementById('flashSuccess').classList.add('show');
+    document.getElementById('flashSuccessMsg').textContent = 'Account created! Sign in below.';
+  }
+
+  function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  }
+
+  document.getElementById('btnLogin').addEventListener('click', doLogin);
+  document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+  async function doLogin() {
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('btnLogin');
+    const errDiv   = document.getElementById('errorMsg');
+    const errText  = document.getElementById('errorText');
+
+    errDiv.classList.remove('show');
+    document.querySelectorAll('input').forEach(i => i.classList.remove('error-field'));
+
+    if (!email || !password) {
+      errText.textContent = 'Please enter your email and password.';
+      errDiv.classList.add('show');
+      if (!email) document.getElementById('email').classList.add('error-field');
+      if (!password) document.getElementById('password').classList.add('error-field');
+      return;
+    }
+
+    btn.classList.add('loading');
+    try {
+      const res  = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = data.redirect || '/';
+      } else {
+        errText.textContent = data.error || 'Login failed.';
+        errDiv.classList.add('show');
+        document.getElementById('password').classList.add('error-field');
+      }
+    } catch(e) {
+      errText.textContent = 'Network error. Is the server running?';
+      errDiv.classList.add('show');
+    }
+    btn.classList.remove('loading');
+  }
+</script>
+<script src="/static/three-bg.js"></script>
+</body>
+</html>

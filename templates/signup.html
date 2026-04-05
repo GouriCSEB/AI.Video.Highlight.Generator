@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Create Account — HILIGHT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Clash+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#07060f; --surface:rgba(255,255,255,0.04); --surface2:rgba(255,255,255,0.07);
+      --border:rgba(255,255,255,0.08); --accent:#8b5cf6; --accent2:#f59e0b;
+      --text:#f0eeff; --muted:#6b648f; --error:#f43f5e;
+      --font-head:'Cabinet Grotesk','Syne',sans-serif; --font-mono:'JetBrains Mono','DM Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-head);min-height:100vh;display:flex;overflow:hidden}
+
+    .left-panel{width:55%;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .left-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 30% 40%,rgba(139,92,246,0.08) 0%,transparent 70%);}
+    .grid-bg{display:none}
+    @keyframes gridMove{from{transform:translateY(0)}to{transform:translateY(48px)}}
+    .left-content{position:relative;z-index:2;max-width:420px;padding:48px}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+    .brand-mark{width:44px;height:44px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .brand-name{font-size:22px;font-weight:800;letter-spacing:.08em}
+    .left-heading{font-size:38px;font-weight:800;line-height:1.2;margin-bottom:16px}
+    .left-heading em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .left-sub{font-family:var(--font-mono);font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:36px}
+
+    /* Steps */
+    .steps{display:flex;flex-direction:column;gap:0}
+    .step{display:flex;gap:16px;position:relative}
+    .step:not(:last-child)::after{content:'';position:absolute;left:15px;top:36px;width:2px;height:calc(100% - 8px);background:var(--border)}
+    .step-num{width:32px;height:32px;border-radius:50%;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.35);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#a78bfa;flex-shrink:0;position:relative;z-index:1}
+    .step-body{padding-bottom:24px}
+    .step-title{font-size:14px;font-weight:600;margin-bottom:4px}
+    .step-desc{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+
+    .right-panel{width:45%;display:flex;align-items:center;justify-content:center;padding:48px 56px;background:var(--surface);border-left:1px solid var(--border);position:relative;overflow-y:auto}
+    .right-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#8b5cf6,#f59e0b,transparent)}
+
+    .form-wrap{width:100%;max-width:360px}
+    .form-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px}
+    .form-title{font-size:28px;font-weight:800;margin-bottom:6px}
+    .form-sub{font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-bottom:32px}
+    .form-sub a{color:var(--accent);text-decoration:none}
+    .form-sub a:hover{text-decoration:underline}
+
+    .field{margin-bottom:16px}
+    .field label{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+    .input-wrap{position:relative}
+    .input-wrap .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+    .field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:12px 14px 12px 42px;outline:none;transition:border-color .2s,box-shadow .2s}
+    .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,92,246,0.15)}
+    .field input::placeholder{color:var(--muted)}
+    .field input.error-field{border-color:var(--error)}
+    .field-hint{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:5px}
+
+    /* Password strength */
+    .pw-strength{margin-top:6px;display:none}
+    .pw-strength.show{display:block}
+    .strength-bar{height:3px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-bottom:4px}
+    .strength-fill{height:100%;border-radius:99px;transition:width .3s,background .3s}
+    .strength-label{font-family:var(--font-mono);font-size:10px}
+
+    .toggle-pw{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:15px;color:var(--muted);background:none;border:none;padding:0}
+    .toggle-pw:hover{color:var(--text)}
+
+    .error-msg{background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.3);border-radius:8px;padding:12px 14px;font-family:var(--font-mono);font-size:12px;color:var(--error);margin-bottom:16px;display:none;align-items:center;gap:8px}
+    .error-msg.show{display:flex}
+
+    /* Terms */
+    .terms{display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;cursor:pointer}
+    .terms input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;margin-top:2px;cursor:pointer;flex-shrink:0}
+    .terms-text{font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.5}
+    .terms-text a{color:var(--accent);text-decoration:none}
+
+    .btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;border-radius:8px;color:#000;font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:4px;position:relative}
+    .btn-submit:hover{opacity:.92;transform:translateY(-1px)}
+    .btn-submit:active{transform:translateY(0)}
+    .btn-submit.loading{opacity:.7;cursor:not-allowed}
+    .btn-submit .spinner{display:none;width:16px;height:16px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+    .btn-submit.loading .btn-text{display:none}
+    .btn-submit.loading .spinner{display:block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media(max-width:768px){.left-panel{display:none}.right-panel{width:100%;border-left:none;padding:32px 24px}}
+  </style>
+  <link rel="stylesheet" href="/static/animations.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<canvas id="three-canvas"></canvas>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<div class="left-panel">
+  <div class="grid-bg"></div>
+  <div class="left-content">
+    <div class="brand">
+      <div class="brand-mark">▶</div>
+      <span class="brand-name">HILIGHT</span>
+    </div>
+    <h1 class="left-heading">Get started<br>in <em>3 simple</em><br>steps</h1>
+    <p class="left-sub">Create your free account and start turning long videos into sharp highlights.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Create your account</div>
+          <div class="step-desc">Fill in the form — takes under 30 seconds</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Upload your video</div>
+          <div class="step-desc">MP4, MOV, AVI, MKV up to 500MB</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Download your highlight</div>
+          <div class="step-desc">AI extracts the best moments automatically</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="form-wrap">
+    <div class="form-eyebrow">Free forever</div>
+    <h2 class="form-title">Create your account</h2>
+    <p class="form-sub">Already have one? <a href="/login">Sign in →</a></p>
+
+    <div class="error-msg" id="errorMsg">
+      <span>⚠️</span><span id="errorText">Something went wrong.</span>
+    </div>
+
+    <div class="field">
+      <label for="name">Full name</label>
+      <div class="input-wrap">
+        <span class="icon">👤</span>
+        <input type="text" id="name" placeholder="Kiran Kumar" autocomplete="name"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="email">Email address</label>
+      <div class="input-wrap">
+        <span class="icon">✉️</span>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+        <button class="toggle-pw" onclick="togglePw('password',this)" tabindex="-1">👁</button>
+      </div>
+      <div class="pw-strength" id="pwStrength">
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+        <span class="strength-label" id="strengthLabel"></span>
+      </div>
+      <div class="field-hint">At least 6 characters</div>
+    </div>
+
+    <div class="field">
+      <label for="confirm">Confirm password</label>
+      <div class="input-wrap">
+        <span class="icon">🔒</span>
+        <input type="password" id="confirm" placeholder="Repeat your password" autocomplete="new-password"/>
+        <button class="toggle-pw" onclick="togglePw('confirm',this)" tabindex="-1">👁</button>
+      </div>
+    </div>
+
+    <label class="terms">
+      <input type="checkbox" id="terms"/>
+      <span class="terms-text">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+    </label>
+
+    <button class="btn-submit" id="btnSignup">
+      <span class="btn-text">Create Account →</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+</div>
+
+<script>
+  function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+    btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  }
+
+  function checkStrength(val) {
+    const wrap  = document.getElementById('pwStrength');
+    const fill  = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+    if (!val) { wrap.classList.remove('show'); return; }
+    wrap.classList.add('show');
+    let score = 0;
+    if (val.length >= 6)  score++;
+    if (val.length >= 10) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = [
+      {w:'20%',  c:'#ff5c5c', t:'Very weak'},
+      {w:'40%',  c:'#f59e0b', t:'Weak'},
+      {w:'60%',  c:'#eab308', t:'Fair'},
+      {w:'80%',  c:'#22c55e', t:'Strong'},
+      {w:'100%', c:'#00e57a', t:'Very strong'},
+    ];
+    const l = levels[Math.min(score, levels.length) - 1] || levels[0];
+    fill.style.width      = l.w;
+    fill.style.background = l.c;
+    label.textContent     = l.t;
+    label.style.color     = l.c;
+  }
+
+  document.getElementById('btnSignup').addEventListener('click', doSignup);
+  document.getElementById('confirm').addEventListener('keydown', e => { if(e.key==='Enter') doSignup(); });
+
+  async function doSignup() {
+    const name     = document.getElementById('name').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm  = document.getElementById('confirm').value;
+    const termsOk  = document.getElementById('terms').checked;
+    const btn      = document.getElementById('btnSignup');
+    const errDiv   = document.getElementById('errorMsg');
+    const errText  = document.getElementById('errorText');
+
+    errDiv.classList.remove('show');
+    document.querySelectorAll('input').forEach(i => i.classList.remove('error-field'));
+
+    if (!name || !email || !password || !confirm) {
+      errText.textContent = 'Please fill in all fields.';
+      errDiv.classList.add('show'); return;
+    }
+    if (password !== confirm) {
+      errText.textContent = 'Passwords do not match.';
+      errDiv.classList.add('show');
+      document.getElementById('confirm').classList.add('error-field'); return;
+    }
+    if (!termsOk) {
+      errText.textContent = 'Please accept the Terms of Service to continue.';
+      errDiv.classList.add('show'); return;
+    }
+
+    btn.classList.add('loading');
+    try {
+      const res  = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name, email, password})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = '/login?signup=success';
+      } else {
+        errText.textContent = data.error || 'Signup failed.';
+        errDiv.classList.add('show');
+      }
+    } catch(e) {
+      errText.textContent = 'Network error. Is the server running?';
+      errDiv.classList.add('show');
+    }
+    btn.classList.remove('loading');
+  }
+</script>
+<script src="/static/three-bg.js"></script>
+</body>
+</html>
